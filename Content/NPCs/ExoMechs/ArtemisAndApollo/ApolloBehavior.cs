@@ -9,6 +9,7 @@ using CalamityMod.NPCs;
 using CalamityMod.NPCs.ExoMechs.Apollo;
 using CalamityMod.Particles;
 using CalamityMod.Sounds;
+using CalamityMod.Systems.Collections;
 using CalamityMod.UI;
 using Luminance.Assets;
 using Luminance.Common.Utilities;
@@ -294,7 +295,7 @@ public sealed partial class ApolloBehavior : NPCBehaviorOverride, IExoMech, IExo
         NPC.defense = CommonExoTwinFunctionalities.Defense;
         NPC.DR_NERD(CommonExoTwinFunctionalities.DamageReductionFactor);
 
-        float healthBoostFactor = CalamityConfig.Instance.BossHealthBoost * 0.01f + 1f;
+        float healthBoostFactor = CalamityServerConfig.Instance.BossHealthBoost * 0.01f + 1f;
         NPC.LifeMaxNERB(1250000, 1495000, 650000);
         NPC.lifeMax = (int)MathF.Round(NPC.lifeMax * healthBoostFactor);
 
@@ -537,7 +538,7 @@ public sealed partial class ApolloBehavior : NPCBehaviorOverride, IExoMech, IExo
         if (ExoTwinsStates.DoBehavior_EnterSecondPhase_ApolloIsProtectingArtemis(this))
         {
             modifiers.FinalDamage *= ExoTwinsStates.EnterSecondPhase_ApolloDamageProtectionFactor;
-            if (!CalamityLists.projectileDestroyExceptionList.Contains(projectile.type))
+            if (!CalamityProjectileSets.ShouldNotBeReflected[projectile.type])
                 projectile.active = false;
         }
     }
