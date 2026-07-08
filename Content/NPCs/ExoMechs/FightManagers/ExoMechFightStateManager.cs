@@ -9,6 +9,7 @@ using Luminance.Common.DataStructures;
 using Luminance.Common.Utilities;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.ID;
 using Terraria.ModLoader;
 using WoTM.Common.Utilities;
 using WoTM.Content.NPCs.ExoMechs.ArtemisAndApollo;
@@ -20,6 +21,8 @@ namespace WoTM.Content.NPCs.ExoMechs.FightManagers;
 
 public sealed class ExoMechFightStateManager : ModSystem
 {
+    private static int firstMechID;
+
     /// <summary>
     /// The set of all previously summoned Exo Mechs throughout the fight. Used to keep track of which Exo Mechs existed in the past, after they are killed.
     /// </summary>
@@ -214,6 +217,34 @@ public sealed class ExoMechFightStateManager : ModSystem
         FightOngoing = true;
     }
 
+    // OK so sometimes the primary mech seems to randomly
+    // vanish under mysterious circumstances, causing this system
+    // to resummon it again and instantly move to the
+    // mecha mayhem phase, causing that horrible, infamous bug.
+    // I dunno where this arises from yet, but as a workaround, this
+    // exists to ensures that the primary mech simply reappears
+    // if it vanished in the very first phase for some mysterious reason.
+    /// <summary>
+    /// Resummons the primary mech if battle circumstances require it.
+    /// </summary>
+    private static bool ResummonPrimaryMechIfNecessary()
+    {
+        if (CurrentPhase != ExoMechFightDefinitions.StartingSoloPhaseDefinition)
+            return false;
+
+        int index = NPC.FindFirstNPC(firstMechID);
+        if (index != -1)
+            return false;
+
+        if (Main.netMode != NetmodeID.MultiplayerClient && !NPC.AnyNPCs(firstMechID))
+        {
+            Player toSummonNear = Main.player[Player.FindClosest(new(Main.maxTilesX * 8f, (float)Main.worldSurface * 16f), 1, 1)];
+            NPC.NewNPC(new EntitySource_WorldEvent(), (int)toSummonNear.Center.X, (int)toSummonNear.Center.Y - 1000, firstMechID, 1);
+        }
+
+        return true;
+    }
+
     /// <summary>
     /// Grantes infinite flight to all players for the purposes of the Exo Mechs fight.
     /// </summary>
@@ -320,6 +351,10 @@ public sealed class ExoMechFightStateManager : ModSystem
             return;
 
         RecordPreviouslySummonedMechs();
+
+        if (firstMechID != 0 && ResummonPrimaryMechIfNecessary())
+            return;
+
         CalculateFightState();
         EvaluatePhase();
 
@@ -351,6 +386,7 @@ public sealed class ExoMechFightStateManager : ModSystem
         if (PreviouslySummonedMechIDs.Count >= 1)
             PreviouslySummonedMechIDs.Clear();
 
+        firstMechID = 0;
         ExoMechSummonDelayTimer = 0;
         FightOngoing = false;
         CurrentPhase = PhaseDefinition.UndefinedPhase;
@@ -445,6 +481,9 @@ public sealed class ExoMechFightStateManager : ModSystem
 
         if (!npc.TryGetBehavior(out NPCBehaviorOverride b) || b is not IExoMech exoMech)
             return;
+
+        if (firstMechID == 0)
+            firstMechID = npc.type;
 
         exoMech.IsPrimaryMech = true;
         npc.netUpdate = true;
