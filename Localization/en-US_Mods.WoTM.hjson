@@ -154,3 +154,21 @@ UI: {
 	ArtemisAndApolloIconMessage: Artemis and Apollo, a pair of extraordinarily nimble automatons with unstable energy reserves.
 	HadesIconMessage: Hades, a serpentine terror with impervious armor and innumerable laser turrets.
 }
+
+Config: {
+	EnableVoiceActing: {
+		Label: Enable Draedon Voice Acting
+		Tooltip: If enabled, Draedon will speak with voice acting during dialogues. If disabled, only text will appear.
+	}
+}
+
+Configs: {
+	WoTMConfig: {
+		EnableVoiceActing: {
+			Tooltip: If enabled, Draedon will speak with voice acting during dialogues. If disabled, only text will appear.
+			Label: Enable Draedon Voice Acting
+		}
+
+		DisplayName: WoTM Config
+	}
+}
