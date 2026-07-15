@@ -14,19 +14,23 @@ public class DraedonSubtitleManager : ModSystem
 
     /// <summary>
     /// The current dialogue instance that's being played.
-    /// </summary>
-    ///
-    /// <remarks>
     /// Defaults to null, indicating that nothing is being played.
-    /// </remarks>
+    /// </summary>
     public static DraedonDialogue? CurrentSequence
     {
         get;
         private set;
     }
-
+	
+    public static bool IsSpeaking => CurrentSequence is not null;
+	
     public override void UpdateUI(GameTime gameTime)
     {
+        if (CurrentSequence is not null)
+            DraedonDialogueManager.IsSpeaking = true;
+        else
+            DraedonDialogueManager.IsSpeaking = false;
+
         if (!DraedonDialogueManager.UseSubtitles || !NPC.AnyNPCs(ModContent.NPCType<CalamityMod.NPCs.ExoMechs.Draedon>()))
         {
             Stop();
@@ -59,13 +63,12 @@ public class DraedonSubtitleManager : ModSystem
         SequenceTimer = 0;
         subtitleLoop?.Stop();
         subtitleLoop = null;
+        DraedonDialogueManager.IsSpeaking = false;
     }
 
     /// <summary>
     /// Prepares a given subtitle for playing and display.
     /// </summary>
-    /// <param name="time">The relative play timer for the subtitles.</param>
-    /// <param name="subtitle">The subtitles to display.</param>
     public static void Play(int time, DraedonDialogue subtitle)
     {
         if (time < 0)
@@ -81,5 +84,7 @@ public class DraedonSubtitleManager : ModSystem
             subtitleLoop = LoopedSoundManager.CreateNew(new SoundStyle("WoTM/" + path) with { Volume = 2f }, () => CurrentSequence is null);
             subtitleLoop.Update(Main.screenPosition + Main.ScreenSize.ToVector2() * 0.5f, s => s.Volume = 2.3f);
         }
+        
+        DraedonDialogueManager.IsSpeaking = true;
     }
 }

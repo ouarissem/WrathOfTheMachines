@@ -106,9 +106,9 @@ public class DraedonSubtitleRenderer : ModSystem
         Vector2 origin = textSize * 0.5f;
 
         for (int i = 0; i < 3; i++)
-            ChatManager.DrawColorCodedStringShadow(Main.spriteBatch, SubtitleFont, text, drawPosition, Color.Black, 0f, origin, Vector2.One * 1.5f, -1, i + 1f);
+            ChatManager.DrawColorCodedStringShadow(Main.spriteBatch, SubtitleFont, text, drawPosition, Color.Black, 0f, origin, Vector2.One * 1.2f, -1, i + 1f);
 
-        ChatManager.DrawColorCodedString(Main.spriteBatch, SubtitleFont, text, drawPosition, CurrentSequence.Text.TextColor, 0f, origin, Vector2.One * 1.5f);
+        ChatManager.DrawColorCodedString(Main.spriteBatch, SubtitleFont, text, drawPosition, CurrentSequence.Text.TextColor, 0f, origin, Vector2.One * 1.2f);
     }
 
     internal static void RenderSubtitlesWithPostProcessing()

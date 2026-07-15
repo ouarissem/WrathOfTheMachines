@@ -7,12 +7,12 @@ namespace WoTM.Content.NPCs.ExoMechs.Draedon.Dialogue;
 
 public class DraedonDialogueChain(int pauseBetweenDialogue = 30)
 {
-    /// <summary>
+	/// <summary>
     /// The tree of all dialogue this chain has.
     /// </summary>
     internal readonly LinkedList<Func<DraedonDialogue>> Chain = [];
-
-    /// <summary>
+	
+	/// <summary>
     /// How much of a pause there should be, in frames, between spoken dialogue.
     /// </summary>
     public int PauseBetweenDialogue
@@ -21,18 +21,18 @@ public class DraedonDialogueChain(int pauseBetweenDialogue = 30)
         init;
     } = pauseBetweenDialogue;
 
-    /// <summary>
+	/// <summary>
     /// Adds a new dialogue instance to the chain based on a given text key.
     /// </summary>
     /// <param name="dialogueKey">The dialogue's identifier key.</param>
     public DraedonDialogueChain Add(string dialogueKey)
     {
-        // A lambda is used instead of direct access to ensure that access is deferred after mod loading.
+		// A lambda is used instead of direct access to ensure that access is deferred after mod loading.
         Add(() => DraedonDialogueManager.Dialogue[dialogueKey]);
         return this;
     }
 
-    /// <summary>
+	/// <summary>
     /// Adds a new dialogue instance to the chain.
     /// </summary>
     /// <param name="dialogue">The dialogue to add.</param>
@@ -85,7 +85,7 @@ public class DraedonDialogueChain(int pauseBetweenDialogue = 30)
     /// <param name="time">How much time has passed since the start of the dialogue chain's playback.</param>
     public void Process(int time, out DraedonDialogue? dialogue, out int relativeTime)
     {
-        // Relative time in this sense refers to how much time has elapsed since the given dialogue instance began.
+		// Relative time in this sense refers to how much time has elapsed since the given dialogue instance began.
         relativeTime = time;
         dialogue = GetActiveDialogue(ref relativeTime);
 
@@ -102,6 +102,7 @@ public class DraedonDialogueChain(int pauseBetweenDialogue = 30)
 
         if (DraedonDialogueManager.UseSubtitles)
             DraedonSubtitleManager.Play(relativeTime, dialogue);
+        
     }
 
     /// <summary>

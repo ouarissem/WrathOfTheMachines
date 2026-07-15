@@ -1,25 +1,49 @@
 ﻿using System.Collections.Generic;
+using System;
 using Microsoft.Xna.Framework;
+using Terraria;
 using Terraria.ModLoader;
+using WoTM.Core.Configuration;
 
 namespace WoTM.Content.NPCs.ExoMechs.Draedon.Dialogue;
 
 public class DraedonDialogueManager : ModSystem
 {
     /// <summary>
-    /// The set of all dialogue registered.
+    /// The dictionary that stores all dialogue entries, keyed by their unique string identifier.
     /// </summary>
     public static readonly Dictionary<string, DraedonDialogue> Dialogue = [];
 
     /// <summary>
-    /// Whether subtitles should be used over chat-based text.
+    /// Determines whether subtitles (audio + text) should be used instead of plain chat messages.
+    /// When true, the audio files are played with on-screen subtitles.
     /// </summary>
-    public static bool UseSubtitles => false;
+    public static bool UseSubtitles => WoTM.Config.EnableVoiceActing;
+
+    /// <summary>
+    /// The target volume for the game music when Draedon is speaking.
+    /// This creates the "ducking" effect where music lowers during dialogue.
+    /// </summary>
+    public static float MusicVolumeWhileSpeaking => 0.2f;
+
+    /// <summary>
+    /// How quickly the music volume transitions (0-1). Higher = faster transition.
+    /// </summary>
+    public static float MusicVolumeTransitionSpeed => 0.05f;
+
+    /// <summary>
+    /// Tracks whether Draedon is currently speaking.
+    /// Used to control music ducking.
+    /// </summary>
+    public static bool IsSpeaking { get; internal set; }
+
+    private static float _originalMusicVolume = 1f;
+    private static bool _isDucking = false;
 
     public override void PostSetupContent()
     {
         Color edgyTextColor = CalamityMod.NPCs.ExoMechs.Draedon.TextColorEdgy;
-
+		
         GenerateNew("IntroductionMonologue1");
         GenerateNew("IntroductionMonologue2");
         GenerateNew("IntroductionMonologue3");
@@ -65,6 +89,7 @@ public class DraedonDialogueManager : ModSystem
         GenerateNew("EndOfBattle_FirstDefeat4");
         GenerateNew("EndOfBattle_FirstDefeat5");
         GenerateNew("EndOfBattle_FirstDefeat6");
+
         GenerateNew("EndOfBattle_SuccessiveDefeat1");
         GenerateNew("EndOfBattle_SuccessiveDefeat2");
         GenerateNew("EndOfBattle_SuccessiveDefeat3_Perfect");
@@ -88,7 +113,6 @@ public class DraedonDialogueManager : ModSystem
         GenerateNew("EndOfBattle_FirstDefeatReconBodyKill3");
 
         GenerateNew("Death", null, LumUtils.SecondsToFrames(1.85f));
-
         GenerateNew("PlayerDeathAtAmusingTime", null, LumUtils.SecondsToFrames(1.2f));
 
         GenerateNew("Error");
@@ -100,12 +124,51 @@ public class DraedonDialogueManager : ModSystem
         Color chatTextColor = chatTextColorOverride ?? CalamityMod.NPCs.ExoMechs.Draedon.TextColor;
 
         string localizationKey = $"Mods.WoTM.NPCs.Draedon.{key}";
-        DraedonDialogue dialogue = new(localizationKey, new DraedonSubtitle(SoundPath(key)), new DraedonChatTextData(chatTextColor, chatTextSpeakTime));
+        DraedonDialogue dialogue = new(
+            localizationKey,
+            new DraedonSubtitle(SoundPath(key)),
+            new DraedonChatTextData(chatTextColor, chatTextSpeakTime)
+        );
         Dialogue.Add(key, dialogue);
-
         return dialogue;
     }
 
     internal static string SoundPath(string relativePath) =>
         $"Assets/Sounds/Custom/VoiceActing/Drae_{relativePath}.wav";
+
+    /// <summary>
+    /// Updates the music volume based on whether Draedon is speaking.
+    /// Creates a smooth ducking effect while respecting the user's original volume setting.
+    /// </summary>
+    public override void UpdateUI(GameTime gameTime)
+    {
+        bool isSpeaking = DraedonSubtitleManager.IsSpeaking;
+
+        if (isSpeaking && !_isDucking)
+        {
+            _originalMusicVolume = Main.musicVolume;
+            _isDucking = true;
+        }
+
+        if (!isSpeaking && _isDucking)
+        {
+            _isDucking = false;
+            Main.musicVolume = _originalMusicVolume;
+            return;
+        }
+
+        if (isSpeaking)
+        {
+            float targetVolume = Math.Min(MusicVolumeWhileSpeaking, _originalMusicVolume);
+            float currentVolume = Main.musicVolume;
+
+            if (Math.Abs(currentVolume - targetVolume) > 0.001f)
+            {
+                Main.musicVolume = MathHelper.Lerp(currentVolume, targetVolume, MusicVolumeTransitionSpeed);
+
+                if (Math.Abs(Main.musicVolume - targetVolume) < 0.001f)
+                    Main.musicVolume = targetVolume;
+            }
+        }
+    }
 }
