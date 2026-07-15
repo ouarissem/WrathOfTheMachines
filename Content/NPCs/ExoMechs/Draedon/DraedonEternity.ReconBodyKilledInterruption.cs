@@ -33,6 +33,9 @@ public sealed partial class DraedonBehavior : NPCBehaviorOverride
 
     /// <summary>
     /// The monologue that Draedon uses upon the Exo Mechs battle concluding after being harmed.
+    /// The order of Add() calls determines the sequence of spoken lines.
+    /// Each key must exist in DraedonDialogueManager.Dialogue and in the localization file.
+    /// The corresponding audio file is automatically loaded from Assets/Sounds/Custom/VoiceActing/Drae_{key}.wav
     /// </summary>
     public static readonly DraedonDialogueChain PostBattleDeathInterjection = new DraedonDialogueChain().
         Add("EndOfBattle_FirstDefeatReconBodyKill1").
@@ -41,6 +44,7 @@ public sealed partial class DraedonBehavior : NPCBehaviorOverride
 
     /// <summary>
     /// The AI method that makes Draedon speak to the player after an Exo Mech has been defeated.
+    /// Processes the dialogue chain and automatically plays the corresponding audio/subtitles.
     /// </summary>
     public void DoBehavior_ReconBodyKilledInterruption()
     {
@@ -51,6 +55,7 @@ public sealed partial class DraedonBehavior : NPCBehaviorOverride
         NPC.SmoothFlyNear(hoverDestination, 0.05f, 0.94f);
 
         int speakTimer = (int)AITimer - 150;
+		 // Plays the interruption dialogue.
         PostBattleDeathInterjection.Process(speakTimer);
 
         if (PostBattleDeathInterjection.Finished(speakTimer))

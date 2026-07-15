@@ -9,12 +9,16 @@ namespace WoTM.Content.NPCs.ExoMechs.Draedon;
 public sealed partial class DraedonBehavior : NPCBehaviorOverride
 {
     /// <summary>
-    /// The monologue that Draedon should use at the start of the battle. Once he's been spoken to, his dialogue is a lot lighter.
+    /// The monologue that Draedon should use at the start of the battle.
+    /// Once he's been spoken to, his dialogue is a lot lighter.
+    /// This chain determines the sequence of audio/text that plays.
+    /// The order of Add() calls is the order in which they play.
     /// </summary>
     public static DraedonDialogueChain StartingMonologueToUse => CalamityWorld.TalkedToDraedon ? StartingMonologueBrief : StartingMonologue;
 
     /// <summary>
     /// The AI method that makes Draedon speak to the player before the battle.
+    /// It processes the dialogue chain and automatically plays the corresponding audio.
     /// </summary>
     public void DoBehavior_StartingMonologue()
     {
@@ -29,7 +33,6 @@ public sealed partial class DraedonBehavior : NPCBehaviorOverride
             else
                 ChangeAIState(DraedonAIState.ExoMechSpawnAnimation);
 
-            // Mark Draedon as talked to.
             if (!CalamityWorld.TalkedToDraedon)
             {
                 CalamityWorld.TalkedToDraedon = true;

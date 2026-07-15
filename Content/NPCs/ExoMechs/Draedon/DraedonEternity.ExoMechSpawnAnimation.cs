@@ -10,6 +10,7 @@ using Luminance.Common.Utilities;
 using Luminance.Core.Graphics;
 using Luminance.Core.Sounds;
 using Microsoft.Xna.Framework;
+using System.IO;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
@@ -55,19 +56,24 @@ public sealed partial class DraedonBehavior : NPCBehaviorOverride
 
     /// <summary>
     /// The monologue that Draedon uses upon the player choosing an Exo Mech, assuming he hasn't spoken to the player before.
+    /// The order of Add() calls determines the sequence of spoken lines.
+    /// Each key must exist in DraedonDialogueManager.Dialogue and in the localization file.
+    /// The corresponding audio file is automatically loaded from Assets/Sounds/Custom/VoiceActing/Drae_{key}.wav
     /// </summary>
     public static readonly DraedonDialogueChain ChoiceResponse = new DraedonDialogueChain().
         Add("ExoMechChoiceResponse1").
         Add("ExoMechChoiceResponse2");
 
     /// <summary>
-    /// The monologue that Draedon uses upon the player choosing an Exo Mech, assuming he has spoken to the player before.
+    /// The monologue that Draedon uses upon the player choosing an Exo Mech (brief version).
+    /// Used when the player has already spoken to Draedon before.
     /// </summary>
     public static readonly DraedonDialogueChain ChoiceResponseBrief = new DraedonDialogueChain().
         Add("ExoMechChoiceResponse2");
 
     /// <summary>
     /// The AI method that makes Draedon handle the Exo Mech spawning.
+    /// Processes the dialogue chain and automatically plays the corresponding audio/subtitles.
     /// </summary>
     public void DoBehavior_ExoMechSpawnAnimation()
     {
@@ -129,7 +135,10 @@ public sealed partial class DraedonBehavior : NPCBehaviorOverride
                 if (Main.netMode == NetmodeID.Server)
                 {
                     CalamityWorld.DraedonMechToSummon = ExoMech.None;
-                    ExoMechSelectionPacket.Send();
+                    ModPacket packet = ModContent.GetInstance<CalamityMod.CalamityMod>().GetPacket();
+                    packet.Write((byte)40);
+                    packet.Write((int)CalamityWorld.DraedonMechToSummon);
+                    packet.Send();
                 }
             }
 

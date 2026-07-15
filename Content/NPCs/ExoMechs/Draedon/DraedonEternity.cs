@@ -152,26 +152,19 @@ public sealed partial class DraedonBehavior : NPCBehaviorOverride
 
     public override void AI()
     {
-        // Be immune to every debuff.
         for (int k = 0; k < NPC.buffImmune.Length; k++)
             NPC.buffImmune[k] = true;
 
-        // Set the whoAmI variable.
         CalamityGlobalNPC.draedon = NPC.whoAmI;
         CalamityGlobalNPC.draedonAmbience = -1;
 
-        // Emit music. If the battle is ongoing, Draedon emits the battle theme.
-        // Otherwise, he emits his trademark ambience.
-        // This takes priority over everything.
         if (ExoMechFightStateManager.FightState.TotalAliveMechs <= 0 && AIState != DraedonAIState.ExoMechSpawnAnimation)
             CalamityGlobalNPC.draedonAmbience = NPC.whoAmI;
 
-        // Pick someone else to pay attention to if the old target is gone.
         if (PlayerToFollow.dead || !PlayerToFollow.active)
         {
             NPC.TargetClosest(false);
 
-            // Fuck off if no living target exists.
             bool deathAnimation = AIState == DraedonAIState.StandardPlayerDeathMonologue || AIState == DraedonAIState.FunnyPlayerDeathMonologue;
             if ((PlayerToFollow.dead || !PlayerToFollow.active) && !deathAnimation)
             {
@@ -224,7 +217,6 @@ public sealed partial class DraedonBehavior : NPCBehaviorOverride
 
         Lighting.AddLight(NPC.Center, Vector3.One * 0.76f);
 
-        // Stay within the world.
         NPC.position.Y = MathHelper.Clamp(NPC.position.Y, 150f, Main.maxTilesY * 16f - 150f);
 
         NPC.ShowNameOnHover = HologramOverlayInterpolant <= 0.75f && NPC.Opacity >= 0.25f;
@@ -279,13 +271,11 @@ public sealed partial class DraedonBehavior : NPCBehaviorOverride
         Vector2 projectorDrawPosition = hologramDrawPosition + Vector2.UnitY * NPC.scale * (ProjectorVerticalOffset + 85f);
         Rectangle projectorFrame = projector.Frame(1, 4, 0, (int)AITimer / 5 % 4);
 
-        // Render the projector.
         Main.spriteBatch.Draw(projector, projectorDrawPosition, projectorFrame, drawColor, 0f, projectorFrame.Size() * 0.5f, NPC.scale, NPC.spriteDirection.ToSpriteDirection() ^ SpriteEffects.FlipHorizontally, 0f);
         Main.spriteBatch.Draw(projectorGlowmask, projectorDrawPosition, projectorFrame, glowmaskColor, 0f, projectorFrame.Size() * 0.5f, NPC.scale, NPC.spriteDirection.ToSpriteDirection() ^ SpriteEffects.FlipHorizontally, 0f);
 
         Main.spriteBatch.PrepareForShaders();
 
-        // Render the projector's light area.
         Texture2D pixel = MiscTexturesRegistry.Pixel.Value;
         Vector2 projectionArea = Vector2.One * 200f / pixel.Size();
         Color projectionColor = glowmaskColor.MultiplyRGB(new(0.75f, 1f, 1f)) * HologramOpacity;
@@ -352,7 +342,6 @@ public sealed partial class DraedonBehavior : NPCBehaviorOverride
         WasKilled = true;
         PostBattleInterjectionTimer = (int)AITimer;
 
-        // Skip to the next line.
         dialogue.Process(PostBattleInterjectionTimer, out DraedonDialogue? currentDialogue, out int relativeTime);
         if (currentDialogue is not null)
             PostBattleInterjectionTimer += currentDialogue.Duration - relativeTime - 1;

@@ -15,6 +15,10 @@ public sealed partial class DraedonBehavior : NPCBehaviorOverride
 {
     /// <summary>
     /// The monologue that Draedon uses upon an Exo Mech being defeated.
+    /// This chain includes dynamic selection for the damage assessment line.
+    /// The order of Add() calls determines the sequence of spoken lines.
+    /// Each key must exist in DraedonDialogueManager.Dialogue and in the localization file.
+    /// The corresponding audio file is automatically loaded from Assets/Sounds/Custom/VoiceActing/Drae_{key}.wav
     /// </summary>
     public static readonly DraedonDialogueChain FirstInterjection = new DraedonDialogueChain().
         Add("Interjection1").
@@ -36,6 +40,7 @@ public sealed partial class DraedonBehavior : NPCBehaviorOverride
 
     /// <summary>
     /// The AI method that makes Draedon speak to the player after an Exo Mech has been defeated.
+    /// Processes the dialogue chain and automatically plays the corresponding audio/subtitles.
     /// </summary>
     public void DoBehavior_FirstInterjection()
     {
@@ -48,7 +53,6 @@ public sealed partial class DraedonBehavior : NPCBehaviorOverride
         Vector2 hoverDestination = PlayerToFollow.Center + new Vector2((PlayerToFollow.Center.X - NPC.Center.X).NonZeroSign() * -450f, -85f);
         NPC.SmoothFlyNear(hoverDestination, 0.05f, 0.94f);
 
-        // Reset the variables to their controls by healing the player.
         if (currentLine == DraedonDialogueManager.Dialogue["Interjection4"] && relativeTimer == currentLine.Duration - 60)
             ResetPlayerFightVariables();
 
@@ -86,6 +90,7 @@ public sealed partial class DraedonBehavior : NPCBehaviorOverride
 
     /// <summary>
     /// Selects interjection text based on whatever the player took the most damage from.
+    /// The selected key must exist in the localization file and have a corresponding audio file.
     /// </summary>
     public static string SelectDamageInterjectionText()
     {

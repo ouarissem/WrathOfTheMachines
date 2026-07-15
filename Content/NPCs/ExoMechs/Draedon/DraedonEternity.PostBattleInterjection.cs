@@ -17,24 +17,28 @@ public sealed partial class DraedonBehavior : NPCBehaviorOverride
 {
     /// <summary>
     /// The monologue that Draedon uses upon the Exo Mechs battle concluding the first time you defeat them.
+    /// The order of Add() calls determines the sequence of spoken lines.
+    /// Each key must exist in DraedonDialogueManager.Dialogue and in the localization file.
+    /// The corresponding audio file is automatically loaded from Assets/Sounds/Custom/VoiceActing/Drae_{key}.wav
     /// </summary>
     public static readonly DraedonDialogueChain PostBattleInterjection = new DraedonDialogueChain().
-        Add("EndOfBattle_FirstDefeat1").
-        Add("EndOfBattle_FirstDefeat2").
-        Add("EndOfBattle_FirstDefeat3").
-        Add("EndOfBattle_FirstDefeat4").
-        Add("EndOfBattle_FirstDefeat5").
-        Add("EndOfBattle_FirstDefeat6");
+        Add("EndOfBattle_FirstDefeat1"). // "Extraordinary!"
+        Add("EndOfBattle_FirstDefeat2"). // "This outcome has fallen far outside the expectations..."
+        Add("EndOfBattle_FirstDefeat3"). // "I shall soon depart..."
+        Add("EndOfBattle_FirstDefeat4"). // "Take this, as an extension of gratitude..."
+        Add("EndOfBattle_FirstDefeat5"). // "If you wish to do combat with my machines again..."
+        Add("EndOfBattle_FirstDefeat6"); // "Farewell."
 
     /// <summary>
-    /// The monologue that Draedon uses upon the Exo Mechs battle concluding the first time you defeat them.
+    /// The monologue that Draedon uses upon the Exo Mechs battle concluding in successive defeats.
+    /// This chain includes dynamic selection based on player performance.
     /// </summary>
     public static readonly DraedonDialogueChain PostBattleAnalysisInterjection = new DraedonDialogueChain().
-        Add("EndOfBattle_SuccessiveDefeat1").
-        Add("EndOfBattle_SuccessiveDefeat2").
-        Add(() => DraedonDialogueManager.Dialogue[EndOfBattle_SuccessiveDefeat3Selection()]).
-        Add(() => DraedonDialogueManager.Dialogue[EndOfBattle_SuccessiveDefeat4Selection()]).
-        Add("EndOfBattle_SuccessiveDefeat5");
+        Add("EndOfBattle_SuccessiveDefeat1"). // "Another completed experiment."
+        Add("EndOfBattle_SuccessiveDefeat2"). // "Allow me a moment to analyze the results..."
+        Add(() => DraedonDialogueManager.Dialogue[EndOfBattle_SuccessiveDefeat3Selection()]). // Dynamic performance assessment.
+        Add(() => DraedonDialogueManager.Dialogue[EndOfBattle_SuccessiveDefeat4Selection()]). // Dynamic improvement suggestion.
+        Add("EndOfBattle_SuccessiveDefeat5"); // "I await the next battle."
 
     /// <summary>
     /// How many style points the player must have in order for Draedon to recognize a battle as perfect.
@@ -58,6 +62,7 @@ public sealed partial class DraedonBehavior : NPCBehaviorOverride
 
     /// <summary>
     /// The AI method that makes Draedon speak to the player after an Exo Mech has been defeated.
+    /// Processes the dialogue chain and automatically plays the corresponding audio/subtitles.
     /// </summary>
     public void DoBehavior_PostBattleInterjection()
     {
@@ -95,6 +100,7 @@ public sealed partial class DraedonBehavior : NPCBehaviorOverride
 
     /// <summary>
     /// Selects interjection text based on the player's performance for the third post-battle dialogue line.
+    /// The selected key must exist in the localization file and have a corresponding audio file.
     /// </summary>
     public static string EndOfBattle_SuccessiveDefeat3Selection()
     {
@@ -120,6 +126,7 @@ public sealed partial class DraedonBehavior : NPCBehaviorOverride
 
     /// <summary>
     /// Selects interjection text based on the player's performance for the fourth post-battle dialogue line.
+    /// The selected key must exist in the localization file and have a corresponding audio file.
     /// </summary>
     public static string EndOfBattle_SuccessiveDefeat4Selection()
     {

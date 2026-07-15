@@ -9,6 +9,9 @@ public sealed partial class DraedonBehavior : NPCBehaviorOverride
 {
     /// <summary>
     /// The monologue that Draedon uses if the player dies during the battle.
+    /// The order of Add() calls determines the sequence of spoken lines.
+    /// Each key must exist in DraedonDialogueManager.Dialogue and in the localization file.
+    /// The corresponding audio file is automatically loaded from Assets/Sounds/Custom/VoiceActing/Drae_{key}.wav
     /// </summary>
     public static readonly DraedonDialogueChain StandardPlayerDeathMonologue = new DraedonDialogueChain().
         Add("Death");
@@ -21,6 +24,7 @@ public sealed partial class DraedonBehavior : NPCBehaviorOverride
 
     /// <summary>
     /// The AI method that makes Draedon speak after the player dies.
+    /// Processes the dialogue chain and automatically plays the corresponding audio/subtitles.
     /// </summary>
     public void DoBehavior_PlayerDeathMonologue()
     {
