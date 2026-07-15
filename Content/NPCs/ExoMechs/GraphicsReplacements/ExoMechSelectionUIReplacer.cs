@@ -8,6 +8,7 @@ using Luminance.Assets;
 using Luminance.Core.Hooking;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.IO;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
@@ -117,6 +118,11 @@ public class ExoMechSelectionUIReplacer : ModSystem
     {
         CalamityWorld.DraedonMechToSummon = mechToSummon;
         if (Main.netMode != NetmodeID.SinglePlayer)
-            ExoMechSelectionPacket.Send();
+        {
+            ModPacket packet = ModContent.GetInstance<CalamityMod.CalamityMod>().GetPacket();
+            packet.Write((byte)40);
+            packet.Write((int)CalamityWorld.DraedonMechToSummon);
+            packet.Send();
+        }
     }
 }
