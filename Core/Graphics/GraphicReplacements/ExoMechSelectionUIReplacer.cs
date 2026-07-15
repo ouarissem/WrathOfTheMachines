@@ -8,9 +8,11 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using System.IO;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
+using Terraria.ModLoader;
 using WoTM.Core.BehaviorOverrides;
 
 namespace WoTM.Core.Graphics.GraphicReplacements;
@@ -105,6 +107,11 @@ public class ExoMechSelectionUIReplacer : ILEditProvider
     {
         CalamityWorld.DraedonMechToSummon = mechToSummon;
         if (Main.netMode != NetmodeID.SinglePlayer)
-            ExoMechSelectionPacket.Send();
+        {
+            ModPacket packet = ModContent.GetInstance<CalamityMod.CalamityMod>().GetPacket();
+            packet.Write((byte)40);
+            packet.Write((int)CalamityWorld.DraedonMechToSummon);
+            packet.Send();
+        }
     }
 }
